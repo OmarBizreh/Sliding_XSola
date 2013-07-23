@@ -1,0 +1,102 @@
+#!/sbin/sh
+
+if [ -e /cache/recovery/boot ]
+then
+
+rm /cache/recovery/boot
+touch /cache/recovery/enterrecovery
+
+else
+
+# trigger red, orange, yellow, green, blue, purple LED :)
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '50' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '255' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+usleep 200000
+
+# trigger vibration
+echo '200' > /sys/class/timed_output/vibrator/enable
+
+# disable LEDs
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-red/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-green/brightness
+echo '0' > /sys/devices/platform/nmk-i2c.2/i2c-2/2-0040/leds/pwr-blue/brightness
+
+cat /dev/input/event2 > /dev/keycheck&
+sleep 3
+
+kill -9 $!
+
+fi
+
+if [ -s /dev/keycheck -o -e /cache/recovery/enterrecovery ]
+then
+
+rm /cache/recovery/enterrecovery
+
+mount -o remount,rw rootfs /
+# shifting to "umount -l /partition" to avoid mounting issues in recovery
+stop cspsa
+stop tad
+killall -9 cspsa-server
+killall -9 logwrapper
+killall -9 chargemon
+killall -9 tad
+umount -l /system
+umount -l /data
+umount -l /cache
+umount -l /sdcard
+umount -l /mnt/sdcard
+rm -r /sdcard
+rm -r /not/sdcard
+mkdir /sdcard
+mkdir /tmp
+rm /etc
+mkdir /etc
+cp /recovery.fstab /etc/recovery.fstab
+mount /dev/block/mmcblk0p14 /sdcard
+
+/sbin/recovery &
+/sbin/ps >/sdcard/ps.log
+ 
+fi
