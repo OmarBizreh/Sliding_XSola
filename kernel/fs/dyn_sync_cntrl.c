@@ -24,6 +24,7 @@
 #include <linux/writeback.h>
 
 #define DYN_FSYNC_VERSION 1
+
 #define DYN_FSYNC_VERSION_MAJOR 1
 #define DYN_FSYNC_VERSION_MINOR 2
 
